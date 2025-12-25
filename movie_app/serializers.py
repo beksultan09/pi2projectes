@@ -4,10 +4,17 @@ from .models import (UserProfile, Category, Genre, Country, Director, Actor,
 from rest_framework import serializers
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class UserProfileListSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = '__all__'
+        fields = ['id', 'user_photo', 'username']
+
+class UserProfileDetailSerializer(serializers.ModelSerializer):
+    date_registered = serializers.DateField(format='%d-%m-%Y')
+    class Meta:
+        model = UserProfile
+        fields = ['first_name', 'last_name', 'username', 'email', 'age',
+                  'phone_number', 'user_photo', 'status', 'date_registered']
 
 
 class UserProfileRatingSerializer(serializers.ModelSerializer):
@@ -55,17 +62,17 @@ class CountryListSerializer(serializers.ModelSerializer):
 
 
 
-
-class DirectorSerializer(serializers.ModelSerializer):
+class DirectorListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Director
-        fields = ['full_name']
+        fields = ['id', 'full_name']
 
 
-class ActorSerializer(serializers.ModelSerializer):
+
+class ActorListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Actor
-        fields = ['full_name']
+        fields = ['id', 'full_name']
 
 
 class MovieListSerializer(serializers.ModelSerializer):
@@ -77,6 +84,15 @@ class MovieListSerializer(serializers.ModelSerializer):
         model = Movie
         fields = ['id', 'movie_poster', 'movie_name',
                   'year', 'country', 'genre', 'movie_status']
+
+
+class DirectorDetailSerializer(serializers.ModelSerializer):
+    birth_date = serializers.DateField(format='%d-%m-%Y')
+    director_movies = MovieListSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Director
+        fields = ['full_name', 'director_photo', 'bio', 'birth_date', 'director_movies']
 
 
 class GenreDetailSerializer(serializers.ModelSerializer):
@@ -117,20 +133,35 @@ class ReviewSerializer(serializers.ModelSerializer):
 class MovieDetailSerializer(serializers.ModelSerializer):
     year = serializers.DateField('%d-%m-%Y')
     country = CountryListSerializer(many=True)
-    director = DirectorSerializer(many=True)
+    director = DirectorListSerializer(many=True)
     genre = GenreNameSerializer(many=True)
-    actor = ActorSerializer(many=True)
+    actor = ActorListSerializer(many=True)
     videos = MovieVideoSerializer(many=True, read_only=True)
     frames = MovieFrameSerializer(many=True, read_only=True)
     ratings = RatingSerializer(many=True, read_only=True)
     reviews = ReviewSerializer(many=True, read_only=True)
+    get_avg_ratings = serializers.SerializerMethodField()
+    get_count_ratings = serializers.SerializerMethodField()
 
     class Meta:
         model = Movie
         fields = ['movie_name', 'year', 'slogan', 'country', 'director', 'genre',
                   'movie_type', 'movie_time', 'actor', 'movie_poster', 'trailer',
-                  'description', 'movie_status', 'videos', 'frames', 'ratings',
-                  'reviews']
+                  'description', 'movie_status', 'videos', 'frames', 'get_avg_ratings',
+                  "get_count_ratings", 'ratings', 'reviews',]
+
+    def get_avg_ratings(self, obj):
+        return obj.get_avg_ratings()
+
+    def get_count_ratings(self, obj):
+        return obj.get_count_ratings()
+
+class ActorDetailSerializer(serializers.ModelSerializer):
+    actor_movies = MovieDetailSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Actor
+        fields = ['full_name', 'actor_photo', 'birth_date', 'bio', 'actor_movies']
 
 
 class ReviewLikeSerializer(serializers.ModelSerializer):

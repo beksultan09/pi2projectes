@@ -65,7 +65,7 @@ class Movie(models.Model):
     year = models.DateField()
     slogan = models.CharField(max_length=100, null=True, blank=True)
     country = models.ManyToManyField(Country, related_name='countries')
-    director = models.ManyToManyField(Director)
+    director = models.ManyToManyField(Director, related_name='director_movies')
     genre = models.ManyToManyField(Genre, related_name='genres_movies')
     MovieTypeChoices = (
     ('360p', '360p'),
@@ -75,7 +75,7 @@ class Movie(models.Model):
     ('1080p Ultra', '1080p Ultra'),)
     movie_type = models.CharField(max_length=20, choices=MovieTypeChoices)
     movie_time = models.PositiveSmallIntegerField()
-    actor = models.ManyToManyField(Actor)
+    actor = models.ManyToManyField(Actor, related_name='actor_movies')
     movie_poster = models.ImageField(upload_to='movie_images/')
     trailer = models.URLField()
     description = models.TextField()
@@ -83,6 +83,16 @@ class Movie(models.Model):
 
     def __str__(self):
         return self.movie_name
+
+    def get_avg_ratings(self):
+        all_ratings = self.ratings.all()
+        if all_ratings.exists():
+            return round(sum([i.stars for i in all_ratings]) / all_ratings.count(), 2)
+        return 0
+
+    def get_count_ratings(self):
+            return self.ratings.count()
+
 
 
 class MovieVideo(models.Model):

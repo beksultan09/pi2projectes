@@ -1,6 +1,7 @@
-from .serializers import (UserProfileSerializer, CategoryListSerializer, CategoryDetailSerializer,
-                          GenreListSerializer, GenreDetailSerializer, CountryListSerializer, CountryDetailSerializer, DirectorSerializer,
-                          ActorSerializer, MovieListSerializer, MovieDetailSerializer, RatingSerializer, ReviewSerializer,
+from .serializers import (UserProfileListSerializer, UserProfileDetailSerializer, CategoryListSerializer, CategoryDetailSerializer,
+                          GenreListSerializer, GenreDetailSerializer, CountryListSerializer, CountryDetailSerializer, DirectorListSerializer,
+                          DirectorDetailSerializer, ActorListSerializer, ActorDetailSerializer, MovieListSerializer, MovieDetailSerializer, RatingSerializer,
+                          ReviewSerializer,
                           ReviewLikeSerializer, FavoriteSerializer, FavoriteItemSerializer,
                           HistorySerializer)
 from .models import (UserProfile, Category, Genre, Country, Director, Actor, Movie,
@@ -11,9 +12,20 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from .pagination import MovieListPagination, CategoryListPagination, GenreListPagination
 
 
-class UserProfileViewSet(viewsets.ModelViewSet):
+class UserProfileListAPIView(generics.ListAPIView):
     queryset = UserProfile.objects.all()
-    serializer_class = UserProfileSerializer
+    serializer_class = UserProfileListSerializer
+
+    def get_queryset(self):
+        return UserProfile.objects.filter(id=self.request.user.id)
+
+
+class UserProfileDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileDetailSerializer
+
+    def get_queryset(self):
+        return UserProfile.objects.filter(id=self.request.user.id)
 
 
 class CategoryListAPIView(generics.ListAPIView):
@@ -46,14 +58,22 @@ class CountryDetailAPIView(generics.RetrieveAPIView):
     serializer_class = CountryDetailSerializer
 
 
-class DirectorViewSet(viewsets.ModelViewSet):
+class DirectorListAPIView(generics.ListAPIView):
     queryset = Director.objects.all()
-    serializer_class = DirectorSerializer
+    serializer_class = DirectorListSerializer
 
+class DirectorDetailAPIView(generics.RetrieveAPIView):
+    queryset = Director.objects.all()
+    serializer_class = DirectorDetailSerializer
 
-class ActorViewSet(viewsets.ModelViewSet):
+class ActorListAPIView(generics.ListAPIView):
     queryset = Actor.objects.all()
-    serializer_class = ActorSerializer
+    serializer_class = ActorListSerializer
+
+
+class ActorDetailAPIView(generics.RetrieveAPIView):
+    queryset = Actor.objects.all()
+    serializer_class = ActorDetailSerializer
 
 
 class MovieListAPIView(generics.ListAPIView):
